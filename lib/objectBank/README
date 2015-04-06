@@ -1,0 +1,9 @@
+OBJECTBANK MATLAB README
+
+In code folder, you will find part and partless.
+
+part code is the original code we used in ECCV to produce the result. partless code is available to speed up the feature extraction while maintaining even higher classification result.
+
+feature extraction using partless code takes approximately 7 seconds per image.
+
+get_traintestfeat.m and run_classification.m are helper functions we used to produce the result; in order to use it, LIBSVM needs to be successfully compiled first and appropriate configuration should replace {} within the code.
