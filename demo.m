@@ -1,11 +1,11 @@
 % demo code to solve Eq.7 in the LLC paper
 clear; clc; close all;
 
-N = 100;  % feature dimension
+D = 100;  % feature dimension
 K = 5;  % number of nearest neighbours
 
 % construct codebook
-B = randn( K, N);
+B = randn( K, D);
 
 % create truth code
 c = randn(K, 1);

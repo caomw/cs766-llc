@@ -20,7 +20,7 @@ function [final_dictionary] = code_opt_alg_41(B, X, lambda, sigma)
         d = mat2gray(d); %normalize between 0 and 1
         
         % coding ( size(c) = [1, D] )
-        c(i,:) = %argmin(c) norm( X(i,:) - ( c * final_dictionary *  ) ) .^ 2
+        c(i,:) = %argmin(c) -> norm( X(i,:) - ( c * final_dictionary ) ) .^ 2 + ( lambda * norm( d .* c ) .^ 2 );
         
         % remove bias
         

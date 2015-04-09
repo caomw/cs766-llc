@@ -81,3 +81,4 @@ confusion_matrix_kernel = confusionmat(labels_test, labels_test_kernel);
 confusion_matrix_kernel = confusion_matrix_kernel ./ repmat(sum(confusion_matrix_kernel, 2), 1, num_categories);
 figure;
 imshow(confusion_matrix_kernel, 'InitialMagnification', 10000);
+%HeatMap(confusion_matrix_kernel)
