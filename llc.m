@@ -55,15 +55,15 @@ rmpath('lib/spatialpyramid-llc');
 
 %% train SVM without histogram intersection
 % train SVM and predict
-addpath('lib/libsvm-3.20/matlab');
-model_linear = svmtrain(labels_train, pyramid_train, '-t 0');
-[labels_test_linear, accuracy_linear, ~] = svmpredict(labels_test, pyramid_test, model_linear);
-rmpath('lib/libsvm-3.20/matlab');
-% generate confusion matrix
-confusion_matrix_linear = confusionmat(labels_test, labels_test_linear);
-confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
-figure;
-imshow(confusion_matrix_linear, 'InitialMagnification', 10000);
+% addpath('lib/libsvm-3.20/matlab');
+% model_linear = svmtrain(labels_train, pyramid_train, '-t 0');
+% [labels_test_linear, accuracy_linear, ~] = svmpredict(labels_test, pyramid_test, model_linear);
+% rmpath('lib/libsvm-3.20/matlab');
+% % generate confusion matrix
+% confusion_matrix_linear = confusionmat(labels_test, labels_test_linear);
+% confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
+% figure;
+% imshow(confusion_matrix_linear, 'InitialMagnification', 10000);
 
 %% train SVM with histogram intersection
 % precompute kernel

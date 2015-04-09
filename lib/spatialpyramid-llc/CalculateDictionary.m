@@ -148,7 +148,10 @@ centers = kmeans_plusplus(sift_all,params.dictionarySize);
 %% run kmeans
 fprintf('\nRunning k-means\n');
 dictionary = sp_kmeans(centers, sift_all, options);
-    
+
+%% optimize dictionary with algorithm 4.1
+
+
 fprintf('Saving texton dictionary\n');
 sp_make_dir(outFName);
 save(outFName, 'dictionary');
