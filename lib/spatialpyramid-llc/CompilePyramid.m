@@ -83,6 +83,7 @@ for f = 1:length(imageFileList)
     
     %% load texton indices
     in_fname = fullfile(dataBaseDir, sprintf('%s%s', baseFName, textonSuffix));
+    % texton_ind = [];
     load(in_fname, 'texton_ind');
     
     %% get width and height of input image
@@ -105,11 +106,18 @@ for f = 1:length(imageFileList)
             y_lo = floor(hgt/binsHigh * (j-1));
             y_hi = floor(hgt/binsHigh * j);
             
-            texton_patch = texton_ind.data( (texton_ind.x > x_lo) & (texton_ind.x <= x_hi) & ...
-                                            (texton_ind.y > y_lo) & (texton_ind.y <= y_hi));
+            texton_patch = texton_ind.data( ((texton_ind.x > x_lo) & (texton_ind.x <= x_hi) & ...
+                                            (texton_ind.y > y_lo) & (texton_ind.y <= y_hi)), :); % modified for LLC
             
+            if(isempty(texton_patch))
+                texton_patch = zeros(1,params.dictionarySize);
+            end
+                                        
+            % modified pooling for LLC - max pooling
+            pyramid_cell{1}(i,j,:) = max(texton_patch);
+                                        
             % make histogram of features in bin
-            pyramid_cell{1}(i,j,:) = hist(texton_patch, 1:params.dictionarySize)./length(texton_ind.data);
+            %pyramid_cell{1}(i,j,:) = hist(texton_patch, 1:params.dictionarySize)./length(texton_ind.data);
         end
     end
 

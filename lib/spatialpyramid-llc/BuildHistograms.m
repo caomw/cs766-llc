@@ -119,7 +119,7 @@ for f = 1:length(imageFileList)
         features = sp_gen_sift(fullfile(imageBaseDir, imageFName),params);
     end
     ndata = size(features.data,1);
-    nfeatures = size(features.data,2); % added for LLC
+    codebook_size = size(dictionary,1); % added for LLC
     sp_progress_bar(pfig,3,4,f,length(imageFileList),'Building Histograms:');
     %fprintf('Loaded %s, %d descriptors\n', inFName, ndata);
 
@@ -134,13 +134,13 @@ for f = 1:length(imageFileList)
     %if ndata <= batchSize
     
     % LLC (aproximate solution as in Section 3)
-    codes = zeros(ndata, nfeatures);
+    codes = zeros(ndata, codebook_size);
     one_mat = ones(params.k,1);
     %k-NN
-    texton_ind.data = knnsearch(dictionary,features.data,'K',params.k);
+    texton_ind.indices = knnsearch(dictionary,features.data,'K',params.k);
     for i = 1:ndata
         curr_x = features.data(i,:);
-        IDX = texton_ind.data(i,:);
+        IDX = texton_ind.indices(i,:);
         
         %k-NN
         %IDX = knnsearch(dictionary,curr_x,'K',params.k);
@@ -156,6 +156,7 @@ for f = 1:length(imageFileList)
         
         codes(i,IDX) = c_i;
     end
+    texton_ind.data = codes;
     H = sum(codes);
     
         %these can be used for non approximate solution
@@ -175,6 +176,10 @@ for f = 1:length(imageFileList)
 %     end
 
     %H = hist(texton_ind.data, params.dictionarySize);
+    if (size(H_all,2) ~= size(H,2) )
+        disp('what?')
+    end
+    
     H_all = [H_all; H];
 
     %% save texton indices and histograms
