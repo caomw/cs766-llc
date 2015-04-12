@@ -83,7 +83,6 @@ for f = 1:length(imageFileList)
     
     %% load texton indices
     in_fname = fullfile(dataBaseDir, sprintf('%s%s', baseFName, textonSuffix));
-    % texton_ind = [];
     load(in_fname, 'texton_ind');
     
     %% get width and height of input image
@@ -109,15 +108,8 @@ for f = 1:length(imageFileList)
             texton_patch = texton_ind.data( ((texton_ind.x > x_lo) & (texton_ind.x <= x_hi) & ...
                                             (texton_ind.y > y_lo) & (texton_ind.y <= y_hi)), :); % modified for LLC
             
-            if(isempty(texton_patch))
-                texton_patch = zeros(1,params.dictionarySize);
-            end
-                                        
             % modified pooling for LLC - max pooling
             pyramid_cell{1}(i,j,:) = max(texton_patch);
-                                        
-            % make histogram of features in bin
-            %pyramid_cell{1}(i,j,:) = hist(texton_patch, 1:params.dictionarySize)./length(texton_ind.data);
         end
     end
 
@@ -127,9 +119,12 @@ for f = 1:length(imageFileList)
         pyramid_cell{l} = zeros(num_bins, num_bins, params.dictionarySize);
         for i=1:num_bins
             for j=1:num_bins
-                pyramid_cell{l}(i,j,:) = ...
-                pyramid_cell{l-1}(2*i-1,2*j-1,:) + pyramid_cell{l-1}(2*i,2*j-1,:) + ...
-                pyramid_cell{l-1}(2*i-1,2*j,:) + pyramid_cell{l-1}(2*i,2*j,:);
+                % max pooling
+                pyramid_cell{l}(i,j,:) = max(...
+                [squeeze(pyramid_cell{l-1}(2*i-1,2*j-1,:))';...
+                squeeze(pyramid_cell{l-1}(2*i,2*j-1,:))';...
+                squeeze(pyramid_cell{l-1}(2*i-1,2*j,:))';...
+                squeeze(pyramid_cell{l-1}(2*i,2*j,:))']);
             end
         end
         num_bins = num_bins/2;
@@ -137,10 +132,10 @@ for f = 1:length(imageFileList)
 
     %% stack all the histograms with appropriate weights
     pyramid = [];
-    for l = 1:params.pyramidLevels-1
-        pyramid = [pyramid pyramid_cell{l}(:)' .* 2^(-l)];
+    for l = 1:params.pyramidLevels
+        pyramid = [pyramid pyramid_cell{l}(:)'];
     end
-    pyramid = [pyramid pyramid_cell{params.pyramidLevels}(:)' .* 2^(1-params.pyramidLevels)];
+    pyramid = pyramid./sqrt(sum(pyramid.^2));
 
     % save pyramid
     sp_make_dir(outFName);

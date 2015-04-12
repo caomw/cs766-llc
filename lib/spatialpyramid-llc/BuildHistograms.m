@@ -43,7 +43,7 @@ if(~exist('params','var'))
     
     %added
     params.sigma = 1;
-    params.lambda = 0;
+    params.lambda = 1e-4;
     params.k = 5;
 end
 if(~isfield(params,'maxImageSize'))
@@ -73,7 +73,7 @@ if(~isfield(params,'sigma'))
     params.sigma = 1;
 end
 if(~isfield(params,'lambda'))
-    params.lambda = 0;
+    params.lambda = 1e-4;
 end
 if(~isfield(params,'k'))
     params.k = 5;
@@ -119,45 +119,34 @@ for f = 1:length(imageFileList)
         features = sp_gen_sift(fullfile(imageBaseDir, imageFName),params);
     end
     ndata = size(features.data,1);
-    codebook_size = size(dictionary,1); % added for LLC
     sp_progress_bar(pfig,3,4,f,length(imageFileList),'Building Histograms:');
     %fprintf('Loaded %s, %d descriptors\n', inFName, ndata);
 
     %% find texton indices and compute histogram 
-    %texton_ind.data = zeros(ndata,params.k);
+    texton_ind.data = zeros(ndata,params.dictionarySize);
     texton_ind.x = features.x;
     texton_ind.y = features.y;
     texton_ind.wid = features.wid;
     texton_ind.hgt = features.hgt;
-    %run in batches to keep the memory foot print small
-    %batchSize = 100000;
-    %if ndata <= batchSize
     
     % LLC (aproximate solution as in Section 3)
-    codes = zeros(ndata, codebook_size);
-    one_mat = ones(params.k,1);
-    %k-NN
-    texton_ind.indices = knnsearch(dictionary,features.data,'K',params.k);
+    subdict_ind = knnsearch(dictionary,features.data,'K',params.k);
+    one_vec = ones(params.k,1);
     for i = 1:ndata
-        curr_x = features.data(i,:);
-        IDX = texton_ind.indices(i,:);
+        curr_feature = features.data(i,:);
+        curr_subdict_ind = subdict_ind(i,:);
+        curr_subdict = dictionary(curr_subdict_ind,:);
         
-        %k-NN
-        %IDX = knnsearch(dictionary,curr_x,'K',params.k);
-        %texton_ind.data(i,:) = IDX;
-        
-        tmp_B = dictionary(IDX,:);
-
         %solve LLC for xi
-        tmp = tmp_B - one_mat * curr_x;
-        Covar = tmp * tmp';
-        c_tilde = Covar \ one_mat;
-        c_i = c_tilde ./ ( one_mat' * c_tilde ); % normalize
+        B_1x = curr_subdict - one_vec * curr_feature;
+        C = B_1x * B_1x';
+        % C = C + eye(params.k) * params.lambda * trace(C);
+        c_hat = C \ one_vec;
+        c_hat = c_hat / sum(c_hat);
         
-        codes(i,IDX) = c_i;
+        texton_ind.data(i,curr_subdict_ind) = c_hat';
     end
-    texton_ind.data = codes;
-    H = sum(codes);
+    H = max(texton_ind.data);
     
         %these can be used for non approximate solution
         %dist_mat = exp(sp_dist2(features.data, dictionary) ./ params.sigma);
@@ -174,11 +163,6 @@ for f = 1:length(imageFileList)
 %             texton_ind.data(lo:hi,:) = min_ind;
 %         end
 %     end
-
-    %H = hist(texton_ind.data, params.dictionarySize);
-    if (size(H_all,2) ~= size(H,2) )
-        disp('what?')
-    end
     
     H_all = [H_all; H];
 
