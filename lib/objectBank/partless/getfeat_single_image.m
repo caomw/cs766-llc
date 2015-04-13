@@ -1,5 +1,6 @@
-function getfeat_single_image(imagepath, outputfilename, outputpath, savermap)
-	addpath(genpath('code'));
+function [ feat ] = getfeat_single_image(imagepath, outputfilename, outputpath, savermap)
+    mfilepath = fileparts(which('getfeat_single_image'));
+	addpath(genpath(fullfile(mfilepath, 'code')));
 	if ~exist('imagepath', 'var'), imagepath = 'ImageSet/1.jpg'; end
 	if ~exist('outputfilename', 'var'), outputfilename = 'tmp'; end
 	if ~exist('outputpath', 'var'), outputpath = outputfilename;
@@ -12,10 +13,16 @@ function getfeat_single_image(imagepath, outputfilename, outputpath, savermap)
 		end
 		outputpath = [outputpath '/' outputfilename];
 	end
-        if ~exist('savermap', 'var'), savermap = 0;
-        else savermap = 1;
-        end
-	modelpath = 'Model/';
+    if ~exist('savermap', 'var'), savermap = 0;
+    else savermap = 1;
+    end
+    
+    if exist([outputpath '-feat.mat'], 'file')
+        load([outputpath '-feat.mat'], 'feat');
+        return;
+    end
+    
+	modelpath = 'Model';
 
 	detectorlist = detectorset(); L = length(detectorlist);
 	nlevel = 3; dim = 44604; interval=10; nmap = 12; Level=(interval+1):5:(interval+30);
@@ -24,7 +31,7 @@ function getfeat_single_image(imagepath, outputfilename, outputpath, savermap)
 	[feat_py, scales] = featpyramid(im, 8, 10);
 
 	for l=1:L
-		load([modelpath, num2str(detectorlist{l}), '_hard.mat']);
+		load(fullfile(mfilepath, modelpath, [num2str(detectorlist{l}), '_hard.mat']));
 		responsemap = detect_with_responsemap(Level, feat_py, scales, im, model, model.thresh);
 		currfeat = cell(1,nmap);
 		for mapId = 1:nmap, currfeat{mapId} = MaxGetSpatialPyramid(responsemap{mapId}, nlevel); end
@@ -32,9 +39,8 @@ function getfeat_single_image(imagepath, outputfilename, outputpath, savermap)
 	end
 	feat = vertcat(featList{:});
 
-	fid = fopen([outputpath '-feat.txt'], 'w');
-	fprintf(fid, '%f\n', feat);
-	fclose(fid);
+    save([outputpath '-feat.mat'], 'feat');
 
 	if savermap==1, save([outputpath '-rmap.mat'], 'responsemap'); end
+    rmpath(genpath(fullfile(mfilepath, 'code')));
 end
