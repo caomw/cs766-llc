@@ -16,7 +16,7 @@ initial_centers(1,:) = data(initial_center, :); % add first to list
 
 for i=2:k
     fprintf(1, 'K-means++, building K-means seed... k = %u out of %u\n', i, k);
-    current_dists = min(sp_dist2(data, initial_centers(~isnan(initial_centers))), [], 2); % compute distance^2 to nearest existing center
+    current_dists = min(sp_dist2(data, initial_centers(i-1,:)), [], 2); % compute distance^2 to nearest existing center
     weights = current_dists ./ sum(current_dists);
     new_center_index = datasample(1:size(data,1), 1, 2, 'Weights', weights');
     initial_centers(i,:) = data(new_center_index, :); % add center to list
