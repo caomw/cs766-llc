@@ -46,11 +46,7 @@ tic;
 % training set
 pyramid_train = BuildPyramid(filenames_train, image_dir, data_dir, params, true, false);
 % testing set
-pfig = sp_progress_bar('Building Spatial Pyramid');
-BuildHistograms(filenames_test, image_dir, data_dir, '_sift.mat', params, true, pfig);
-pyramid_test = CompilePyramid(filenames_test, data_dir, sprintf('_texton_ind_%d.mat',params.dictionarySize), params, true, pfig);
-close(pfig);
-clear pfig;
+pyramid_test = BuildPyramid(filenames_test, image_dir, data_dir, params, true, false);
 rmpath('lib/spatialpyramid');
 
 %% train SVM without histogram intersection
@@ -60,10 +56,14 @@ model_linear = train(labels_train, sparse(pyramid_train), '-c 10');
 [labels_test_linear, accuracy_linear, ~] = predict(labels_test, sparse(pyramid_test), model_linear);
 rmpath('lib/liblinear-1.96/matlab');
 % generate confusion matrix
-confusion_matrix_linear = confusionmat(labels_test, labels_test_linear);
-confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
+targets = false(num_categories, num_images_test);
+outputs = targets;
+for i = 1 : num_images_test
+    targets(labels_test(i), i) = true;
+    outputs(labels_test_linear(i), i) = true;
+end
 figure;
-imshow(confusion_matrix_linear, 'InitialMagnification', 4000);
+plotconfusion(targets, outputs);
 
 %% train SVM with histogram intersection
 % precompute kernel
@@ -77,7 +77,11 @@ model_kernel = svmtrain(labels_train, [(1 : num_images_train)' kernel_train], '-
 [labels_test_kernel, accuracy_kernel, ~] = svmpredict(labels_test, [(1 : num_images_test)', kernel_test], model_kernel);
 rmpath('lib/libsvm-3.20/matlab');
 % generate confusion matrix
-confusion_matrix_kernel = confusionmat(labels_test, labels_test_kernel);
-confusion_matrix_kernel = confusion_matrix_kernel ./ repmat(sum(confusion_matrix_kernel, 2), 1, num_categories);
+targets = false(num_categories, num_images_test);
+outputs = targets;
+for i = 1 : num_images_test
+    targets(labels_test(i), i) = true;
+    outputs(labels_test_kernel(i), i) = true;
+end
 figure;
-imshow(confusion_matrix_kernel, 'InitialMagnification', 4000);
+plotconfusion(targets, outputs);

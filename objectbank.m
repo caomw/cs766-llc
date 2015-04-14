@@ -82,7 +82,11 @@ model_linear = train(labels_train, examples_train, '-s 6 -c 1e200');
 [labels_test_linear, accuracy_linear, ~] = predict(labels_test, examples_test, model_linear);
 rmpath('lib/liblinear-1.96/matlab');
 % generate confusion matrix
-confusion_matrix_linear = confusionmat(labels_test, labels_test_linear);
-confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
+targets = false(num_categories, num_images_test);
+outputs = targets;
+for i = 1 : num_images_test
+    targets(labels_test(i), i) = true;
+    outputs(labels_test_linear(i), i) = true;
+end
 figure;
-imshow(confusion_matrix_linear, 'InitialMagnification', 4000);
+plotconfusion(targets, outputs);

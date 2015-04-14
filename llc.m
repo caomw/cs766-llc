@@ -36,21 +36,17 @@ clear k files num_files filenames f size_train size_test;
 addpath('lib/spatialpyramid-llc');
 % parameters
 params.maxImageSize = 1000;
-params.gridSpacing = 8; % used 8 in paper
+params.gridSpacing = 8;
 params.patchSize = 16;
 params.dictionarySize = 1024;
-params.numTextonImages = 100; %this is the number of images for training should be 100 in ours
+params.numTextonImages = 50;
 params.pyramidLevels = 3;
 params.oldSift = true;
 tic;
 % training set
 pyramid_train = BuildPyramid(filenames_train, image_dir, data_dir, params, true, false);
 % testing set
-pfig = sp_progress_bar('Building Spatial Pyramid');
-BuildHistograms(filenames_test, image_dir, data_dir, '_sift.mat', params, true, pfig);
-pyramid_test = CompilePyramid(filenames_test, data_dir, sprintf('_texton_ind_%d.mat',params.dictionarySize), params, true, pfig);
-close(pfig);
-clear pfig;
+pyramid_test = BuildPyramid(filenames_test, image_dir, data_dir, params, true, false);
 rmpath('lib/spatialpyramid-llc');
 
 %% train SVM
@@ -59,19 +55,12 @@ addpath('lib/liblinear-1.96/matlab');
 model_linear = train(labels_train, sparse(pyramid_train), '-c 10');
 [labels_test_linear, accuracy_linear, ~] = predict(labels_test, sparse(pyramid_test), model_linear);
 rmpath('lib/liblinear-1.96/matlab');
-
 % generate confusion matrix
-% confusion_matrix_linear = confusionmat(labels_test, labels_test_linear);
-% confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
-% figure;
-% imshow(confusion_matrix_linear, 'InitialMagnification', 4000);
-targets = zeros(max(labels_test),length(labels_test));
-predicted = targets;
-for i=1:length(labels_test) 
-    targets(labels_test(i), i) = 1;
-    predicted(labels_test_linear(i), i) = 1;
+targets = false(num_categories, num_images_test);
+outputs = targets;
+for i = 1 : num_images_test
+    targets(labels_test(i), i) = true;
+    outputs(labels_test_linear(i), i) = true;
 end
 figure;
-plotconfusion(targets,predicted)
-% figure;
-% plotroc(targets,predicted)
+plotconfusion(targets, outputs);
