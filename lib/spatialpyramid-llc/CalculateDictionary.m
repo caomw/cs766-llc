@@ -149,8 +149,8 @@ fprintf('\nRunning k-means\n');
 dictionary = sp_kmeans(centers, sift_all, options);
 
 %% optimize dictionary with algorithm 4.1
-lambda = 100; %from paper
-sigma = 500;
+lambda = 500; %from paper
+sigma = 100;
 dictionary = code_opt_alg_41(dictionary, sift_all, lambda, sigma);
 
 fprintf('Saving texton dictionary\n');

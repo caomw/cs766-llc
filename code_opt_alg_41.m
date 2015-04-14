@@ -52,10 +52,11 @@ function [final_dictionary] = code_opt_alg_41(B, X, lambda, sigma)
         B_i = final_dictionary(id,:);
         
         %solve LLC for ci
-        Aeq2 = ones(size(B_i,1),1);
-        B_1x = B_i - Aeq2 * curr_X;
+        %Aeq2 = ones(size(B_i,1),1);
+        %B_1x = B_i - Aeq2 * curr_X;
+        B_1x = B_i - repmat(curr_X,[size(B_i,1) 1]); %Aeq2 * curr_X;
         C = B_1x * B_1x';
-        c_hat = C \ Aeq2;
+        c_hat = C \ ones(size(B_i,1),1);
         c_hat = c_hat / sum(c_hat);
         
         % update basis
