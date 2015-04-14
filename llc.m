@@ -36,10 +36,10 @@ clear k files num_files filenames f size_train size_test;
 addpath('lib/spatialpyramid-llc');
 % parameters
 params.maxImageSize = 1000;
-params.gridSpacing = 6;
+params.gridSpacing = 8; % used 8 in paper
 params.patchSize = 16;
 params.dictionarySize = 1024;
-params.numTextonImages = 50;
+params.numTextonImages = 100; %this is the number of images for training should be 100 in ours
 params.pyramidLevels = 3;
 params.oldSift = true;
 tic;
