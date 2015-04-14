@@ -59,8 +59,19 @@ addpath('lib/liblinear-1.96/matlab');
 model_linear = train(labels_train, sparse(pyramid_train), '-c 10');
 [labels_test_linear, accuracy_linear, ~] = predict(labels_test, sparse(pyramid_test), model_linear);
 rmpath('lib/liblinear-1.96/matlab');
+
 % generate confusion matrix
-confusion_matrix_linear = confusionmat(labels_test, labels_test_linear);
-confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
+% confusion_matrix_linear = confusionmat(labels_test, labels_test_linear);
+% confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
+% figure;
+% imshow(confusion_matrix_linear, 'InitialMagnification', 4000);
+targets = zeros(max(labels_test),length(labels_test));
+predicted = targets;
+for i=1:length(labels_test) 
+    targets(labels_test(i), i) = 1;
+    predicted(labels_test_linear(i), i) = 1;
+end
 figure;
-imshow(confusion_matrix_linear, 'InitialMagnification', 4000);
+plotconfusion(targets,predicted)
+% figure;
+% plotroc(targets,predicted)
