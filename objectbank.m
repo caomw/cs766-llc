@@ -37,16 +37,52 @@ addpath('lib/objectBank/partless');
 feature_dim = 44604;
 features_train = zeros(num_images_train, feature_dim);
 features_test = zeros(num_images_test, feature_dim);
+fprintf('Extracting features for training set images (%d)\n', num_images_train);
 for i = 1 : num_images_train
+    if ~mod(i, 5),
+       fprintf('.');
+    end
+    if ~mod(i, 100),
+        fprintf(' %d images processed\n', i);
+    end
     img_path = fullfile(image_dir, filenames_train{i});
     [subfolder, filename] = fileparts(filenames_train{i});
     feature_path = fullfile(data_dir, subfolder);
     features_train(i, :) = getfeat_single_image(img_path, filename, feature_path);
 end
+fprintf('Extracting features for testing set images (%d)\n', num_images_test);
 for i = 1 : num_images_test
+    if ~mod(i, 5),
+       fprintf('.');
+    end
+    if ~mod(i, 100),
+        fprintf(' %d images processed\n', i);
+    end
     img_path = fullfile(image_dir, filenames_test{i});
     [subfolder, filename] = fileparts(filenames_test{i});
     feature_path = fullfile(data_dir, subfolder);
     features_test(i, :) = getfeat_single_image(img_path, filename, feature_path);
 end
+clear img_path subfolder filename feature_path;
 rmpath('lib/objectBank/partless');
+
+%% train classifier
+% normalize features
+normalization = false;
+if normalization
+    examples_train = sparse(1 ./ (1 + exp(-features_train)));
+    examples_test = sparse(1 ./ (1 + exp(-features_test)));
+else
+    examples_train = sparse(features_train);
+    examples_test = sparse(features_test);
+end
+% train LR and predict
+addpath('lib/liblinear-1.96/matlab');
+model_linear = train(labels_train, examples_train, '-s 6 -c 1e200');
+[labels_test_linear, accuracy_linear, ~] = predict(labels_test, examples_test, model_linear);
+rmpath('lib/liblinear-1.96/matlab');
+% generate confusion matrix
+confusion_matrix_linear = confusionmat(labels_test, labels_test_linear);
+confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
+figure;
+imshow(confusion_matrix_linear, 'InitialMagnification', 4000);
