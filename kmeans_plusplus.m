@@ -8,19 +8,17 @@
 
 function [initial_centers] = kmeans_plusplus(data, k)
 
-centers = [];
+fprintf(1, 'K-means++, building K-means seed... k = %u out of %u\n', 1, k);
+initial_centers = nan(k,size(data,2));
 initial_center = randperm(size(data,1) , 1); % pick random first center
-centers = [centers; data(initial_center, :)]; % add first to list
-data(initial_center, :) = []; % remove from set
+initial_centers(1,:) = data(initial_center, :); % add first to list
+%data(initial_center, :) = []; % remove from set
 
 for i=2:k
-    
-    current_dists = min(sp_dist2(data, centers), [], 2); % compute distance^2 to nearest existing center
+    fprintf(1, 'K-means++, building K-means seed... k = %u out of %u\n', i, k);
+    current_dists = min(sp_dist2(data, initial_centers(~isnan(initial_centers))), [], 2); % compute distance^2 to nearest existing center
     weights = current_dists ./ sum(current_dists);
     new_center_index = datasample(1:size(data,1), 1, 2, 'Weights', weights');
-    centers = [centers; data(new_center_index, :)]; % add center to list
-    data(new_center_index, :) = []; % remove from set
-    
+    initial_centers(i,:) = data(new_center_index, :); % add center to list
+    %data(new_center_index, :) = []; % remove from set
 end
-
-initial_centers = centers;

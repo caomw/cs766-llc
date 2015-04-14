@@ -13,6 +13,7 @@ function [final_dictionary] = code_opt_alg_41(B, X, lambda, sigma)
     
     final_dictionary = B;
     Aeq = ones(1, M); % optimization params
+    Aeq_T = Aeq';
     %beq = 1;
     %A = [];
     %b = [];
@@ -20,6 +21,7 @@ function [final_dictionary] = code_opt_alg_41(B, X, lambda, sigma)
     %options.MaxFunEvals = 10000;
     for i = 1:N
         fprintf(1, 'Optimizing codebook... %u out of %u\n', i, N);
+        curr_X = X(i,:);
         %d = zeros(M,1);
         
         %locality constraint parameter
@@ -37,11 +39,12 @@ function [final_dictionary] = code_opt_alg_41(B, X, lambda, sigma)
         %c_i = fmincon(objective_func, c_init, A, b, Aeq, beq);
         
         %analytic solution to eq 3 (section 2.4.3):
-        dist_mat = exp(sp_dist2(X(i,:), final_dictionary) ./ sigma);
+        %dist = sp_dist2(curr_X, final_dictionary);
+        dist_mat = exp(sp_dist2(curr_X, final_dictionary) ./ sigma);
         dist_mat = mat2gray(dist_mat); %normalize between 0 and 1
-        B_C = final_dictionary - (Aeq' * X(i,:));
+        B_C = final_dictionary - (Aeq_T * curr_X);
         Covar = B_C * B_C';
-        c_til = (Covar + lambda .* diag(dist_mat)) \ Aeq';
+        c_til = (Covar + lambda .* diag(dist_mat)) \ Aeq_T;
         c_i = c_til ./ (Aeq * c_til);
         
         % remove bias
@@ -50,15 +53,15 @@ function [final_dictionary] = code_opt_alg_41(B, X, lambda, sigma)
         
         %solve LLC for ci
         Aeq2 = ones(size(B_i,1),1);
-        B_1x = B_i - Aeq2 * X(i,:); % check dim
+        B_1x = B_i - Aeq2 * curr_X;
         C = B_1x * B_1x';
-        c_hat = C \ Aeq2; % check dim
+        c_hat = C \ Aeq2;
         c_hat = c_hat / sum(c_hat);
         
         % update basis
-        delta_Bi = -2 .* (c_hat * ( X(i,:) - c_hat' * B_i ) ); % check dim
-        u = sqrt(1 / i);
-        B_i = B_i - ( (u .* delta_Bi) ./ norm(c_hat) ); % ???
-        final_dictionary(id,:) = normr(B_i); %project onto unit circle
+        delta_Bi = -2 .* (c_hat * ( curr_X - c_hat' * B_i ) );
+        %u = sqrt(1 / i);
+        %B_i = B_i - ( (u .* delta_Bi) ./ norm(c_hat) );
+        final_dictionary(id,:) = normr( B_i - ( (sqrt(1 / i) .* delta_Bi) ./ norm(c_hat) ) ); %project onto unit circle
     end
 end
