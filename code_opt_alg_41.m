@@ -44,7 +44,7 @@ function [final_dictionary] = code_opt_alg_41(B, X, lambda, sigma)
         dist_mat = mat2gray(dist_mat); %normalize between 0 and 1
         B_C = final_dictionary - (Aeq_T * curr_X);
         Covar = B_C * B_C';
-        c_til = (Covar + lambda .* diag(dist_mat)) \ Aeq_T;
+        c_til = (Covar + (lambda .* diag(dist_mat))) \ Aeq_T;
         c_i = c_til ./ (Aeq * c_til);
         
         % remove bias
