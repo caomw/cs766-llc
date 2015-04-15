@@ -39,7 +39,7 @@ params.maxImageSize = 1000;
 params.gridSpacing = 8;
 params.patchSize = 16;
 params.dictionarySize = 1024;
-params.numTextonImages = 1500;
+params.numTextonImages = 1500; % use all training images
 params.pyramidLevels = 3;
 params.oldSift = true;
 tic;
