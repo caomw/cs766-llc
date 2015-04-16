@@ -42,6 +42,8 @@ if(~exist('params','var'))
     params.pyramidLevels = 3;
     
     %added
+    params.useCodebookOptim = 1;
+    params.useKMeansPP = 1;
     params.sigma = 1;
     params.lambda = 1e-4;
     params.k = 5;
@@ -67,6 +69,9 @@ end
 if(~exist('canSkip','var'))
     canSkip = 1;
 end
+if(~exist('saveSift','var'))
+    saveSift = 1
+end
 
 %added
 if(~isfield(params,'sigma'))
@@ -77,6 +82,12 @@ if(~isfield(params,'lambda'))
 end
 if(~isfield(params,'k'))
     params.k = 5;
+end
+if(~isfield(params,'useCodebookOptim'))
+    params.useCodebookOptim = 1;
+end
+if(~isfield(params,'useKMeansPP'))
+    params.useKMeansPP = 1;
 end
 
     
@@ -101,8 +112,8 @@ for f = 1:length(imageFileList)
     if(mod(f,100)==0 && exist('pfig','var'))
         sp_progress_bar(pfig,3,4,f,length(imageFileList),'Building Histograms:');
     end
-    outFName = fullfile(dataBaseDir, sprintf('%s_texton_ind_%d.mat', baseFName, params.dictionarySize));
-    outFName2 = fullfile(dataBaseDir, sprintf('%s_hist_%d.mat', baseFName, params.dictionarySize));
+    outFName = fullfile(dataBaseDir, sprintf('%s_texton_ind_%d_%d.mat', baseFName, params.dictionarySize, params.k));
+    outFName2 = fullfile(dataBaseDir, sprintf('%s_hist_%d_%d.mat', baseFName, params.dictionarySize, params.k));
     if(exist(outFName,'file')~=0 && exist(outFName2,'file')~=0 && canSkip)
         %fprintf('Skipping %s\n', imageFName);
         if(nargout>1)
@@ -173,7 +184,7 @@ for f = 1:length(imageFileList)
 end
 
 %% save histograms of all images in this directory in a single file
-outFName = fullfile(dataBaseDir, sprintf('histograms_%d.mat', params.dictionarySize));
+outFName = fullfile(dataBaseDir, sprintf('histograms_%d_%d.mat', params.dictionarySize, params.k));
 %save(outFName, 'H_all', '-ascii');
 
 

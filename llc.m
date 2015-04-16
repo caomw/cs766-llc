@@ -42,6 +42,11 @@ params.dictionarySize = 1024;
 params.numTextonImages = 1500; % use all training images
 params.pyramidLevels = 3;
 params.oldSift = true;
+params.useCodebookOptim = 1;
+params.useKMeansPP = 1;
+params.sigma = 10;
+params.lambda = 50;
+params.k = 5;
 tic;
 % training set
 pyramid_train = BuildPyramid(filenames_train, image_dir, data_dir, params, true, false);
@@ -62,5 +67,11 @@ for i = 1 : num_images_test
     targets(labels_test(i), i) = true;
     outputs(labels_test_linear(i), i) = true;
 end
-figure;
+h = figure;
 plotconfusion(targets, outputs);
+pos = get(h,'Position');
+pos([3,4]) = pos([3,4]) .* 3;
+set(h,'Position', pos, 'PaperPositionMode','auto');
+figure_file_name = fullfile(data_dir, sprintf('confuse_%i_%i', params.dictionarySize, params.k))
+print(figure_file_name,'-dpng');
+close(h);

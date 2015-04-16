@@ -31,6 +31,8 @@ reduce_flag = 1;
 ndata_max = 100000; %use 4% avalible memory if its greater than the default
 
 
+%% parameters
+
 if(~exist('params','var'))
     params.maxImageSize = 1000;
     params.gridSpacing = 8;
@@ -38,6 +40,13 @@ if(~exist('params','var'))
     params.dictionarySize = 200;
     params.numTextonImages = 50;
     params.pyramidLevels = 3;
+    
+    %added
+    params.useCodebookOptim = 1;
+    params.useKMeansPP = 1;
+    params.sigma = 1;
+    params.lambda = 1e-4;
+    params.k = 5;
 end
 if(~isfield(params,'maxImageSize'))
     params.maxImageSize = 1000;
@@ -59,6 +68,26 @@ if(~isfield(params,'pyramidLevels'))
 end
 if(~exist('canSkip','var'))
     canSkip = 1;
+end
+if(~exist('saveSift','var'))
+    saveSift = 1
+end
+
+%added
+if(~isfield(params,'sigma'))
+    params.sigma = 1;
+end
+if(~isfield(params,'lambda'))
+    params.lambda = 1e-4;
+end
+if(~isfield(params,'k'))
+    params.k = 5;
+end
+if(~isfield(params,'useCodebookOptim'))
+    params.useCodebookOptim = 1;
+end
+if(~isfield(params,'useKMeansPP'))
+    params.useKMeansPP = 1;
 end
 
 if(params.numTextonImages > length(imageFileList))
@@ -138,20 +167,25 @@ options = zeros(1,14);
 options(1) = 1; % display
 options(2) = 1;
 options(3) = 0.1; % precision
-% options(5) = 1; % initialization
+options(5) = 1; % initialization
 options(14) = 100; % maximum iterations
 
-% centers = zeros(params.dictionarySize, size(sift_all,2));
-centers = kmeans_plusplus(sift_all,params.dictionarySize);
+% use k-means ++ for initialization of centers?
+if(params.useKMeansPP == 1)
+    options(5) = 0;
+    centers = kmeans_plusplus(sift_all,params.dictionarySize);
+else
+    centers = zeros(params.dictionarySize, size(sift_all,2));
+end
 
 %% run kmeans
 fprintf('\nRunning k-means\n');
 dictionary = sp_kmeans(centers, sift_all, options);
 
-%% optimize dictionary with algorithm 4.1
-lambda = 50;
-sigma = 10;
-dictionary = codebook_opt(dictionary, sift_all, lambda, sigma);
+%% optimize dictionary with algorithm 4.1?
+if(params.useCodebookOptim == 1)
+    dictionary = codebook_opt(dictionary, sift_all, params.lambda, params.sigma);
+end
 
 fprintf('Saving texton dictionary\n');
 sp_make_dir(outFName);

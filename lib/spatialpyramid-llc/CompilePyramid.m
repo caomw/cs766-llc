@@ -33,6 +33,13 @@ if(~exist('params','var'))
     params.dictionarySize = 200;
     params.numTextonImages = 50;
     params.pyramidLevels = 3;
+    
+    %added
+    params.useCodebookOptim = 1;
+    params.useKMeansPP = 1;
+    params.sigma = 1;
+    params.lambda = 1e-4;
+    params.k = 5;
 end
 if(~isfield(params,'maxImageSize'))
     params.maxImageSize = 1000;
@@ -55,6 +62,26 @@ end
 if(~exist('canSkip','var'))
     canSkip = 1;
 end
+if(~exist('saveSift','var'))
+    saveSift = 1
+end
+
+%added
+if(~isfield(params,'sigma'))
+    params.sigma = 1;
+end
+if(~isfield(params,'lambda'))
+    params.lambda = 1e-4;
+end
+if(~isfield(params,'k'))
+    params.k = 5;
+end
+if(~isfield(params,'useCodebookOptim'))
+    params.useCodebookOptim = 1;
+end
+if(~isfield(params,'useKMeansPP'))
+    params.useKMeansPP = 1;
+end
 
 binsHigh = 2^(params.pyramidLevels-1);
 
@@ -73,7 +100,7 @@ for f = 1:length(imageFileList)
     if(mod(f,100)==0 && exist('pfig','var'))
         sp_progress_bar(pfig,4,4,f,length(imageFileList),'Compiling Pyramid:');
     end
-    outFName = fullfile(dataBaseDir, sprintf('%s_pyramid_%d_%d.mat', baseFName, params.dictionarySize, params.pyramidLevels));
+    outFName = fullfile(dataBaseDir, sprintf('%s_pyramid_%d_%d_%d.mat', baseFName, params.dictionarySize, params.k, params.pyramidLevels));
     if(size(dir(outFName),1)~=0 && canSkip)
         %fprintf('Skipping %s\n', imageFName);
         load(outFName, 'pyramid');
@@ -145,7 +172,7 @@ for f = 1:length(imageFileList)
 
 end % f
 
-outFName = fullfile(dataBaseDir, sprintf('pyramids_all_%d_%d.mat', params.dictionarySize, params.pyramidLevels));
+outFName = fullfile(dataBaseDir, sprintf('pyramids_all_%d_%d_%d.mat', params.dictionarySize, params.k, params.pyramidLevels));
 %save(outFName, 'pyramid_all');
 
 
