@@ -15,6 +15,7 @@ function [B] = codebook_opt(Binit, X, lambda, sigma)
         d = sp_dist2(x, B);
         d = exp(d / sigma);
         d = mat2gray(d);
+        d(d == 0) = 10^-16; %according to paper, 0 is not in range
         
         % coding
         B_1x = B - one_vec * x;
