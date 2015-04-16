@@ -1,4 +1,4 @@
-function [tune_accuracy] = llc_tune(image_dir, data_dir, categories, size_train, params)
+function [tune_accuracy] = llc_tune(filenames_train, labels_train, image_dir, data_dir, params)
 
 %% parameters
 
@@ -58,24 +58,6 @@ end
 if(~isfield(params,'useKMeansPP'))
     params.useKMeansPP = 1;
 end
-
-%% construct training set
-filenames_train = {};
-labels_train = [];
-num_categories = length(categories);
-for k = 1 : num_categories
-    files = dir(fullfile(image_dir, categories{k}, '*.jpg'));
-    num_files = size(files, 1);
-    filenames = cell(num_files, 1);
-    for f = 1 : num_files
-        filenames{f} = fullfile(categories{k}, files(f).name);
-    end
-    % training set
-    filenames_train = [filenames_train; filenames(1 : size_train)];
-    labels_train = [labels_train; ones(size_train, 1) * k];
-end
-num_images_train = length(labels_train);
-clear k files num_files filenames f size_train;
 
 %% extract spatial pyramid histograms
 addpath('lib/spatialpyramid-llc');

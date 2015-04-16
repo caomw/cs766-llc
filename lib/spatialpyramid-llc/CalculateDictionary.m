@@ -70,7 +70,7 @@ if(~exist('canSkip','var'))
     canSkip = 1;
 end
 if(~exist('saveSift','var'))
-    saveSift = 1
+    saveSift = 1;
 end
 
 %added
