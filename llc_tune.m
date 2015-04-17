@@ -1,3 +1,7 @@
+%% Cross fold validation function for given parameters and training set
+%
+% Ke Ma & Chris Bodden
+%
 function [tune_accuracy] = llc_tune(filenames_train, labels_train, image_dir, data_dir, params)
 
 %% parameters

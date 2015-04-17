@@ -1,3 +1,7 @@
+%% Calculate dictionary function modified for LLC
+%
+% Ke Ma & Chris Bodden
+%
 function [ dictionary ] = CalculateDictionary( imageFileList, imageBaseDir, dataBaseDir, featureSuffix, params, canSkip, pfig )
 %function [ ] = CalculateDictionary( imageFileList, dataBaseDir, featureSuffix, params, canSkip )
 %

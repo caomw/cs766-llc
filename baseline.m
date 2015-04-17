@@ -1,3 +1,8 @@
+%% Original SPM baseline test script
+%
+% Ke Ma & Chris Bodden
+%
+
 %% set image path and categories
 image_dir = 'datasets/scene-category'; 
 data_dir = '../features/scene-category-baseline';

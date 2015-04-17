@@ -1,3 +1,7 @@
+%% Compile pyramid function modified for LLC
+%
+% Ke Ma & Chris Bodden
+%
 function [ pyramid_all ] = CompilePyramid( imageFileList, dataBaseDir, textonSuffix, params, canSkip, pfig )
 %function [ pyramid_all ] = CompilePyramid( imageFileList, dataBaseDir, textonSuffix, params, canSkip )
 %
@@ -135,7 +139,7 @@ for f = 1:length(imageFileList)
             texton_patch = texton_ind.data( ((texton_ind.x > x_lo) & (texton_ind.x <= x_hi) & ...
                                             (texton_ind.y > y_lo) & (texton_ind.y <= y_hi)), :); % modified for LLC
             
-            % modified pooling for LLC - max pooling
+            % Max pooling - added for LLC
             pyramid_cell{1}(i,j,:) = max(texton_patch);
         end
     end
@@ -146,7 +150,7 @@ for f = 1:length(imageFileList)
         pyramid_cell{l} = zeros(num_bins, num_bins, params.dictionarySize);
         for i=1:num_bins
             for j=1:num_bins
-                % max pooling
+                % Max pooling - added for LLC
                 pyramid_cell{l}(i,j,:) = max(...
                 [squeeze(pyramid_cell{l-1}(2*i-1,2*j-1,:))';...
                 squeeze(pyramid_cell{l-1}(2*i,2*j-1,:))';...

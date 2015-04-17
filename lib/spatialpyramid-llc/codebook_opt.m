@@ -1,4 +1,15 @@
-% algorithm 4.1 from 
+%% Codebook Optimization Algorithm 4.1 from Section 4 of LLC paper
+% http://www.ifp.illinois.edu/~jyang29/LLC.htm
+%
+% Ke Ma & Chris Bodden
+%
+% Inputs:
+%   Binit - M x D initial codebook from k-means
+%   X - N x D matrix of SIFT features for training images
+%   lambda - regularization parameter for LLC optimization function
+%   sigma - distance coefficient parameter
+% Outputs:
+%   B - M x D optimized codebook
 
 function [B] = codebook_opt(Binit, X, lambda, sigma)
     [M,D] = size(Binit); % M = codebook size, D = feature size

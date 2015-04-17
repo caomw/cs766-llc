@@ -1,5 +1,7 @@
-% script to tune llc under many conditions for k and codebook size & then
-% calculate testing result
+%% Script to find optimal k-NN and codebook size
+%
+% Ke Ma & Chris Bodden
+%
 
 %% construct training and testing sets
 image_dir = 'datasets/scene-category'; 

@@ -1,9 +1,7 @@
-% changed for LLC!
-% new params:
-%        params.sigma -> sigma paramater for distance matrix
-%        params.lambda -> regularization constant
-%        params.k -> num of nearest neighbors
-
+%% Build histogram function modified for LLC
+%
+% Ke Ma & Chris Bodden
+%
 function [ H_all ] = BuildHistograms( imageFileList,imageBaseDir, dataBaseDir, featureSuffix, params, canSkip, pfig )
 %function [ H_all ] = BuildHistograms( imageFileList, dataBaseDir, featureSuffix, params, canSkip )
 %
@@ -151,30 +149,12 @@ for f = 1:length(imageFileList)
         %solve LLC for xi
         B_1x = curr_subdict - one_vec * curr_feature;
         C = B_1x * B_1x';
-        % C = C + eye(params.k) * params.lambda * trace(C);
         c_hat = C \ one_vec;
         c_hat = c_hat / sum(c_hat);
         
         texton_ind.data(i,curr_subdict_ind) = c_hat';
     end
     H = max(texton_ind.data);
-    
-        %these can be used for non approximate solution
-        %dist_mat = exp(sp_dist2(features.data, dictionary) ./ params.sigma);
-        %c_tilde = (Covar + params.lambda .* diag(dist)) \ one_mat;
-        
-%         [min_dist, min_ind] = min(dist_mat, [], 2);
-%         texton_ind.data = min_ind;
-%     else
-%         for j = 1:batchSize:ndata
-%             lo = j;
-%             hi = min(j+batchSize-1,ndata);
-%             dist_mat = sp_dist2(features.data(lo:hi,:), dictionary);
-%             [min_dist, min_ind] = min(dist_mat, [], 2);
-%             texton_ind.data(lo:hi,:) = min_ind;
-%         end
-%     end
-    
     H_all = [H_all; H];
 
     %% save texton indices and histograms
