@@ -95,6 +95,12 @@ end
 clear k files num_files filenames f size_train size_test;
 
 % option values
+accuracy_vals = {get(handles.text1,'String'); get(handles.text2,'String'); ... 
+    get(handles.text3,'String'); get(handles.text4,'String'); get(handles.text5,'String'); ...
+    get(handles.text6,'String'); get(handles.text7,'String'); get(handles.text8,'String'); ...
+    get(handles.text9,'String'); get(handles.text10,'String'); get(handles.text11,'String'); ...
+    get(handles.text12,'String'); get(handles.text13,'String'); get(handles.text14,'String'); ...
+    get(handles.text15,'String'); get(handles.text16,'String'); get(handles.text17,'String') };
 k_vals = [1 2 5 10 25 50];
 codebook_vals = [256 512 1024 2048 4096];
 
@@ -114,6 +120,7 @@ params.useObjectBank = 0;
 params.dictionarySize = codebook_vals(4);
 
 % save params
+setappdata(handles.figure1,'accuracy_vals', accuracy_vals);
 setappdata(handles.figure1,'k_vals', k_vals);
 setappdata(handles.figure1,'codebook_vals', codebook_vals);
 setappdata(handles.figure1,'params', params);
@@ -146,6 +153,34 @@ function push_run_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+%
+disp('Supressing warnings');
+warning('off', 'all');
+
+% clear axes
+cla(handles.confuse_plot);
+set(handles.confuse_plot, 'Visible', 'off');
+
+% reset accuracies
+accuracy_vals = getappdata(handles.figure1,'accuracy_vals');
+set(handles.text1, 'String', accuracy_vals(1));
+set(handles.text2, 'String', accuracy_vals(2));
+set(handles.text3, 'String', accuracy_vals(3));
+set(handles.text4, 'String', accuracy_vals(4));
+set(handles.text5, 'String', accuracy_vals(5));
+set(handles.text6, 'String', accuracy_vals(6));
+set(handles.text7, 'String', accuracy_vals(7));
+set(handles.text8, 'String', accuracy_vals(8));
+set(handles.text9, 'String', accuracy_vals(9));
+set(handles.text10, 'String', accuracy_vals(10));
+set(handles.text11, 'String', accuracy_vals(11));
+set(handles.text12, 'String', accuracy_vals(12));
+set(handles.text13, 'String', accuracy_vals(13));
+set(handles.text14, 'String', accuracy_vals(14));
+set(handles.text15, 'String', accuracy_vals(15));
+set(handles.text16, 'String', accuracy_vals(16));
+set(handles.text17, 'String', accuracy_vals(17));
+
 % grab data elements
 params = getappdata(handles.figure1,'params');
 image_dir = getappdata(handles.figure1,'image_dir');
@@ -162,9 +197,73 @@ switch get(get(handles.method_group,'SelectedObject'),'Tag')
     case 'radio_spm',  useLLC = 0;
     otherwise, useLLC = 1; % default... should never happen
 end
+tic;
+if useLLC
+    addpath('lib/spatialpyramid-llc');
+    % training set
+    pyramid_train = BuildPyramid(filenames_train, image_dir, data_dir, params, true, false);
+    % testing set
+    pyramid_test = BuildPyramid(filenames_test, image_dir, data_dir, params, true, false);
+    rmpath('lib/spatialpyramid-llc');
+else
+    data_dir = '../features/scene-category';
+    addpath('lib/spatialpyramid');
+    % training set
+    pyramid_train = BuildPyramid(filenames_train, image_dir, data_dir, params, true, false);
+    % testing set
+    pyramid_test = BuildPyramid(filenames_test, image_dir, data_dir, params, true, false);
+    rmpath('lib/spatialpyramid');
+end
 
-params
-useLLC
+% train SVM and predict
+addpath('lib/liblinear-1.96/matlab');
+model_linear = train(labels_train, sparse(pyramid_train), '-c 10');
+[labels_test_linear, accuracy_linear, ~] = predict(labels_test, sparse(pyramid_test), model_linear);
+rmpath('lib/liblinear-1.96/matlab');
+
+% setup accuracies
+class_acc = nan(1,15);
+for ind = 1:15
+    class_ind = labels_test == ind;
+    class_acc(ind) = sum( labels_test(class_ind) == labels_test_linear(class_ind) ) / sum( class_ind );
+    class_acc(ind) = class_acc(ind) * 100;
+    accuracy_vals{ind} = [accuracy_vals{ind} num2str(class_acc(ind),3)];
+end
+avg_acc = sum(class_acc) / 15;
+accuracy_vals{16} = [accuracy_vals{16} num2str(avg_acc,3)];
+accuracy_vals{17} = [accuracy_vals{17} num2str(accuracy_linear(1),3)];
+set(handles.text1, 'String', accuracy_vals(1));
+set(handles.text2, 'String', accuracy_vals(2));
+set(handles.text3, 'String', accuracy_vals(3));
+set(handles.text4, 'String', accuracy_vals(4));
+set(handles.text5, 'String', accuracy_vals(5));
+set(handles.text6, 'String', accuracy_vals(6));
+set(handles.text7, 'String', accuracy_vals(7));
+set(handles.text8, 'String', accuracy_vals(8));
+set(handles.text9, 'String', accuracy_vals(9));
+set(handles.text10, 'String', accuracy_vals(10));
+set(handles.text11, 'String', accuracy_vals(11));
+set(handles.text12, 'String', accuracy_vals(12));
+set(handles.text13, 'String', accuracy_vals(13));
+set(handles.text14, 'String', accuracy_vals(14));
+set(handles.text15, 'String', accuracy_vals(15));
+set(handles.text16, 'String', accuracy_vals(16));
+set(handles.text17, 'String', accuracy_vals(17));
+
+% generate confusion matrix
+num_images_test = length(labels_test);
+num_categories = length(categories);
+targets = false(num_categories, num_images_test);
+outputs = targets;
+for i = 1 : num_images_test
+    targets(labels_test(i), i) = true;
+    outputs(labels_test_linear(i), i) = true;
+end
+%axes(handles.confuse_plot);
+%plotconfusion(targets, outputs);
+%pos = get(h,'Position');
+%pos([3,4]) = pos([3,4]) .* 3;
+%set(h,'Position', pos, 'PaperPositionMode','auto');
 
 % --- Executes on button press in checkbox_kmeanspp.
 function checkbox_kmeanspp_Callback(hObject, eventdata, handles)
