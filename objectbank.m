@@ -78,7 +78,7 @@ else
 end
 % train LR and predict
 addpath('lib/liblinear-1.96/matlab');
-model_linear = train(labels_train, examples_train, '-s 6 -c 1e200');
+model_linear = train(labels_train, examples_train, '-s 6 -c 10');
 [labels_test_linear, accuracy_linear, ~] = predict(labels_test, examples_test, model_linear);
 rmpath('lib/liblinear-1.96/matlab');
 % generate confusion matrix

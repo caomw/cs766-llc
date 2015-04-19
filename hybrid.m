@@ -89,15 +89,15 @@ end
 clear img_path subfolder filename feature_path;
 rmpath('lib/objectBank/partless');
 
-%% train classifier
+%% train classifier - version 1
 % concatenate feature vectors
 features_train = sparse([llc_train, ob_train]);
 features_test = sparse([llc_test, ob_test]);
 % train LR and predict
 tic
 addpath('lib/liblinear-1.96/matlab');
-model_linear = train(labels_train, features_train, '-s 6 -c 10');
-[labels_test_linear, accuracy_linear, ~] = predict(labels_test, features_test, model_linear);
+model_llc = train(labels_train, features_train, '-s 6 -c 10');
+[labels_test_linear, accuracy_linear, ~] = predict(labels_test, features_test, model_llc);
 rmpath('lib/liblinear-1.96/matlab');
 toc
 % generate confusion matrix
@@ -110,5 +110,31 @@ end
 figure;
 plotconfusion(targets, outputs);
 confusion_matrix_linear = confusionmat(labels_test, labels_test_linear);
+confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
+trace(confusion_matrix_linear) / num_categories
+
+%% train classifier - version 2
+% train SVM/LR and predict
+tic
+addpath('lib/liblinear-1.96/matlab');
+model_llc = train(labels_train, sparse(llc_train), '-c 10');
+[~, ~, decval_llc] = predict(labels_test, sparse(llc_test), model_llc);
+model_ob = train(labels_train, sparse(ob_train), '-s 6 -c 10');
+[~, ~, decval_ob] = predict(labels_test, sparse(ob_test), model_ob);
+decval_all = decval_llc + decval_ob;
+[~, labels_test_predict] = max(decval_all, [], 2);
+accuracy = sum(labels_test_predict==labels_test) / num_images_test
+rmpath('lib/liblinear-1.96/matlab');
+toc
+% generate confusion matrix
+targets = false(num_categories, num_images_test);
+outputs = targets;
+for i = 1 : num_images_test
+    targets(labels_test(i), i) = true;
+    outputs(labels_test_predict(i), i) = true;
+end
+figure;
+plotconfusion(targets, outputs);
+confusion_matrix_linear = confusionmat(labels_test, labels_test_predict);
 confusion_matrix_linear = confusion_matrix_linear ./ repmat(sum(confusion_matrix_linear, 2), 1, num_categories);
 trace(confusion_matrix_linear) / num_categories
