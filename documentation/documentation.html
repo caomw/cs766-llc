@@ -1,0 +1,513 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Ke Ma" />
+  <meta name="author" content="Christopher Bodden" />
+  <title>CS 766 - LLC Project Documentation - CS 766 - LLC Project Documentation</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+<body>
+<div id="header">
+<h1 class="title">CS 766 - LLC Project Documentation</h1>
+<h2 class="author">Ke Ma</h2>
+<h2 class="author">Christopher Bodden</h2>
+<h3 class="date">4/20/2015</h3>
+</div>
+<div id="TOC">
+<ul>
+<li><a href="#llc-project-overview">LLC Project Overview</a><ul>
+<li><a href="#links">Links</a></li>
+<li><a href="#group-members">Group Members:</a></li>
+<li><a href="#assignment-description">Assignment Description:</a></li>
+<li><a href="#features">Features:</a><ul>
+<li><a href="#basic-features">Basic Features:</a></li>
+<li><a href="#bonus-features">“Bonus” Features:</a></li>
+</ul></li>
+<li><a href="#program-screenshot">Program Screenshot:</a></li>
+<li><a href="#best-result">Best Result:</a></li>
+<li><a href="#important-notes">Important Notes:</a></li>
+</ul></li>
+<li><a href="#results">Results</a><ul>
+<li><a href="#spm-baseline">SPM (Baseline)</a><ul>
+<li><a href="#using-non-linear-svm-with-histogram-intersection-kernel">Using Non-linear SVM with Histogram Intersection Kernel</a></li>
+<li><a href="#using-linear-svm">Using Linear SVM</a></li>
+</ul></li>
+<li><a href="#spm-with-old-sift">SPM with “old” SIFT</a><ul>
+<li><a href="#using-non-linear-svm-with-histogram-intersection-kernel-1">Using Non-linear SVM with Histogram Intersection Kernel</a></li>
+<li><a href="#using-linear-svm-1">Using Linear SVM</a></li>
+</ul></li>
+<li><a href="#llc">LLC</a></li>
+<li><a href="#llc-with-k-means">LLC with K-means++</a></li>
+<li><a href="#llc-with-incremental-codebook-optimization">LLC with Incremental Codebook Optimization</a></li>
+<li><a href="#using-all-training-images-to-build-the-dictionary">Using All Training Images to Build the Dictionary</a></li>
+<li><a href="#parameter-selection-for-llc">Parameter Selection for LLC</a></li>
+<li><a href="#object-bank">Object Bank</a></li>
+<li><a href="#combining-llc-and-object-bank">Combining LLC and Object Bank</a><ul>
+<li><a href="#concatenating-feature-vectors">Concatenating Feature Vectors</a></li>
+<li><a href="#summing-up-decision-values">Summing Up Decision Values</a></li>
+</ul></li>
+<li><a href="#adaboosting">Adaboosting</a></li>
+</ul></li>
+<li><a href="#using-the-gui">Using the GUI</a><ul>
+<li><a href="#important-notes-1">Important Notes</a><ul>
+<li><a href="#static-parameters">Static parameters</a></li>
+<li><a href="#directory-structure">Directory Structure</a></li>
+</ul></li>
+<li><a href="#starting-the-gui">Starting the GUI</a></li>
+<li><a href="#selecting-options">Selecting Options</a><ul>
+<li><a href="#method-options">Method Options</a></li>
+<li><a href="#codebook-options">Codebook Options</a></li>
+<li><a href="#other-options">Other Options</a></li>
+</ul></li>
+<li><a href="#interpreting-the-results">Interpreting the Results</a><ul>
+<li><a href="#accuracies-panel">Accuracies Panel</a></li>
+<li><a href="#confusion-matrix-panel">Confusion Matrix Panel</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#file-descriptions">File Descriptions</a><ul>
+<li><a href="#main-files">Main Files</a><ul>
+<li><a href="#llc_gui.m">llc_gui.m</a></li>
+<li><a href="#libspatialpyramid-llckmeans_plusplus.m">lib\spatialpyramid-llc\kmeans_plusplus.m</a></li>
+<li><a href="#libspatialpyramid-llccodebook_opt.m">lib\spatialpyramid-llc\codebook_opt.m</a></li>
+<li><a href="#libspatialpyramid-llccalculatedictionary.m">lib\spatialpyramid-llc\CalculateDictionary.m</a></li>
+<li><a href="#libspatialpyramid-llcbuildhistograms.m">lib\spatialpyramid-llc\BuildHistograms.m</a></li>
+<li><a href="#libspatialpyramid-llccompilepyramid.m">lib\spatialpyramid-llc\CompilePyramid.m</a></li>
+<li><a href="#libspatialpyramid-llcbuildpyramid.m">lib\spatialpyramid-llc\BuildPyramid.m</a></li>
+<li><a href="#libobjectbankpartlessgetfeat_single_image.m">lib\objectBank\partless\getfeat_single_image.m</a></li>
+</ul></li>
+<li><a href="#individual-test-scripts">Individual / Test Scripts</a><ul>
+<li><a href="#baseline.m">baseline.m</a></li>
+<li><a href="#llc.m">llc.m</a></li>
+<li><a href="#objectbank.m">objectbank.m</a></li>
+<li><a href="#hybrid.m">hybrid.m</a></li>
+<li><a href="#adaboost.m">adaboost.m</a></li>
+<li><a href="#llc_test.m">llc_test.m</a></li>
+<li><a href="#llc_tune.m">llc_tune.m</a></li>
+</ul></li>
+<li><a href="#other-files">Other Files</a><ul>
+<li><a href="#llc_gui.fig"><em>llc_gui.fig</em></a></li>
+</ul></li>
+</ul></li>
+<li><a href="#credits">Credits</a><ul>
+<li><a href="#ke-ma">Ke Ma</a></li>
+<li><a href="#christopher-bodden">Christopher Bodden</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+<h1 id="llc-project-overview">LLC Project Overview</h1>
+<h2 id="links">Links</h2>
+<ul>
+<li>Repository: <a href="https://github.com/cbod/cs766-llc" class="uri">https://github.com/cbod/cs766-llc</a></li>
+<li>Wiki: <a href="https://github.com/cbod/cs766-llc/wiki" class="uri">https://github.com/cbod/cs766-llc/wiki</a></li>
+<li>Result, credits and usage info can be found in the offline html wiki or in our Github wiki.</li>
+</ul>
+<h2 id="group-members">Group Members:</h2>
+<p>Ke Ma, Christopher Bodden</p>
+<h2 id="assignment-description">Assignment Description:</h2>
+<p>For this project we implemented Locality-constrained Linear Coding (LLC) image classification method and applied it to a specific dataset of natural scene images. LLC coding improves upon the Vector Quantization (VQ) coding method by preserving a feature’s spatial context.</p>
+<h2 id="features">Features:</h2>
+<p>This is a brief description of our implementation. More details can be found in the other pages of the wiki.</p>
+<h3 id="basic-features">Basic Features:</h3>
+<ul>
+<li>Modified the basic spatial pyramid to use Locality-constrained Linear Coding (LLC) with max pooling.</li>
+<li>Evaluated LLC against VQ</li>
+<li>Tuned parameters for codebook size and k nearest neighbors to maximize accuracy.</li>
+</ul>
+<h3 id="bonus-features">“Bonus” Features:</h3>
+<ul>
+<li>Combined LLC with Object Bank to improve accuracy</li>
+<li>Implemented codebook optimization (algorithm 4.1 in the paper)</li>
+<li>Implemented K-means++ to select K-means initial centers more intelligently</li>
+<li>Built a GUI to easily run our pipeline</li>
+</ul>
+<h2 id="program-screenshot">Program Screenshot:</h2>
+<div class="figure">
+<img src="images/GUI_Snapshot.jpg" />
+
+</div>
+<h2 id="best-result">Best Result:</h2>
+<p>Our best results came from <strong>combining LLC and object bank by summing up decision values</strong> (dicussed in results). The classification accuracy with this technique is <strong>81.34%</strong> which is above the state-of-the-art SPM results. The averaged class accuracy for all classes is <strong>80.65%</strong>.</p>
+<h2 id="important-notes">Important Notes:</h2>
+<p>This project uses many libraries and saves dictionaries/pyramids/object bank data as intermediate files. It is critical that the following directory structure is maintained or the code will not function properly. The most important relationship to preserve is that between the MATLAB scripts and the libraries &amp; dataset.</p>
+<div class="figure">
+<img src="images/DIR_structure.jpg" />
+
+</div>
+<h1 id="results">Results</h1>
+<p>We used the same sets of training images and testing images across all settings. To be specific, we designated the first 100 images of each category as the training set, and all the other images as the testing set.</p>
+<p>Our best results come from <strong>combining LLC and object bank by summing up decision values</strong>. The classification accuracy is <strong>81.34%</strong>. The average accuracy of all classes is <strong>80.65%</strong>.</p>
+<h2 id="spm-baseline">SPM (Baseline)</h2>
+<p>We ran the baseline experiment with the provided spatial pyramid matching (SPM) code.</p>
+<p>The parameters were set according to the SPM paper: SIFT descriptors were computed on 16 x 16 pixel patches over a grid with spacing of 8 pixels; 50 images randomly selected from the training set was used to build the dictionary, whose vocabulary size was 200; histograms were calculated at 3 pyramid levels.</p>
+<p>In our experiment environment (Intel Core i7 2.5GHz, 4 cores, 16GB RAM), it took ~0.2s to process each image.</p>
+<h3 id="using-non-linear-svm-with-histogram-intersection-kernel">Using Non-linear SVM with Histogram Intersection Kernel</h3>
+<p>In order to adopt the histogram intersection kernel, we used LIBSVM instead of LIBLINEAR. We used the default C-SVC for multi-class classification. As the SPM paper didn’t report the C parameter they used, we set it to a empirical value of 10.</p>
+<p>The training and predicting process took ~60s to run. The classification accuracy is 74.87%. The average accuracy of all classes is 74.08%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/SPM_nonlinear.jpg" />
+
+</div>
+<h3 id="using-linear-svm">Using Linear SVM</h3>
+<p>We also tried to train SVM without histogram intersection kernel. This time we used LIBLINEAR to achieve higher speed. We used the default L2-regularized L2-loss SVC (dual). We used the C parameter of 10.</p>
+<p>The training and predicting process took ~1s to run. The classification accuracy is 57.76%. The average accuracy of all classes is 57.83%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/SPM_linear.jpg" />
+
+</div>
+<h2 id="spm-with-old-sift">SPM with “old” SIFT</h2>
+<p>We noticed that our results were not as good as what the SPM paper reported. Their experiment with the same dataset (although the training set and the testing set were different) and the same parameters (except the parameters for SVM) yielded an accuracy of 81%.</p>
+<p>After some investigations, we found that it was due to the “old” SIFT option. After turning on this option, our results were consistent with theirs. It took ~0.45s to process each image.</p>
+<p>It turns out that the SPM code uses different algorithms to compute SIFT descriptor with or without this option. Without this option, the computation is sped up using convolutions, but the quality of the descriptors doesn’t seem to be as good. In the following experiments, we always turned on this option.</p>
+<h3 id="using-non-linear-svm-with-histogram-intersection-kernel-1">Using Non-linear SVM with Histogram Intersection Kernel</h3>
+<p>We used the default C-SVC. We used the C parameter of 10.</p>
+<p>The training and predicting process took ~60s to run. The classification accuracy is 78.96%. The average accuracy of all classes is 77.64%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/SPM_oldsift_nonlinear.jpg" />
+
+</div>
+<h3 id="using-linear-svm-1">Using Linear SVM</h3>
+<p>We used the default L2-regularized L2-loss SVC (dual). We used the C parameter of 10.</p>
+<p>The training and predicting process took ~1s to run. The classification accuracy is 62.01%. The average accuracy of all classes is 61.48%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/SPM_oldsift_linear.jpg" />
+
+</div>
+<p>The above results show that SPM doesn’t work well without histogram intersection kernel.</p>
+<h2 id="llc">LLC</h2>
+<p>After replacing VQ coding with locality-constraint linear coding (LLC) in the SPM code, we ran an experiment to test its performance.</p>
+<p>We used almost the same set of parameters as the previous experiments, expect that we used a larger codebook of size 1024. For the number of nearest neighbors used for approximated LLC , we set it to 5 according to the LLC paper.</p>
+<p>As LLC is more complex than VQ, it was slower to extract features from images. It took ~0.65s to process each image.</p>
+<p>We used the default L2-regularized L2-loss SVC (dual). We used the C parameter of 10.</p>
+<p>The training and predicting process took ~3s to run. The classification accuracy is 77.96%. The average accuracy of all classes is 76.65%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/LLC.jpg" />
+
+</div>
+<p>This shows that LLC is able to yield comparable results using linear SVM because of its non-linear nature.</p>
+<h2 id="llc-with-k-means">LLC with K-means++</h2>
+<p>We then sought approaches to further improving the LLC code. The first component we wanted to improve was the K-means clustering used for building the dictionary. As we all know, the result of K-means clustering depends heavily on the initial cluster center assignment. We thus introduced the K-means++ algorithm to choose intelligent initial cluster centers.</p>
+<p>The same parameters as the previous experiment were used for this trial.</p>
+<p>However, we found K-means++ doesn’t contribute much to achieving higher convergence speed or lower overall clustering error. We thought this might be due to the large number of clusters (1024 in this case). Because this modification only affects dictionary building, the execution time for extracting features and training classifiers kept unchanged.</p>
+<p>The classification accuracy is 78.22%. The average accuracy of all classes is 77.56%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/LLC_kmpp.jpg" />
+
+</div>
+<p>This shows that the clustering component may not be the bottleneck, so improving it doesn’t affect the accuracy much. Anyway, we kept this K-means++ component in the following experiments.</p>
+<h2 id="llc-with-incremental-codebook-optimization">LLC with Incremental Codebook Optimization</h2>
+<p>We also implemented the incremental codebook optimization (algorithm 4.1 in the LLC paper) to improve the performance.</p>
+<p>Two important parameters were involved in the algorithm, lambda and sigma. According to the LLC paper, a combination of lamdba equal to 500 and sigma equal to 100 yields good results, but this was not consistent with our results. We found that using this combination of parameters made the cardinality, i.e. the number of significant values in the coding vectors, very small (mostly 1). After careful selection, we chose a combination of lambda equal to 50 and sigma equal to 10, which resulted in the cardinality ranging from 1 to 20, matching the number of neighbors used during classification.</p>
+<p>This algorithm goes through every SIFT descriptor in the images that are used for building the dictionary, so it can be very slow. Because this modification only affects dictionary building, the execution time for extracting features and training classifiers kept unchanged.</p>
+<p>The classification accuracy is 78.86%. The average accuracy of all classes is 78.15%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/LLC_opt.jpg" />
+
+</div>
+<p>This shows that our codebook optimization works although it takes a long time to run. Since this codebook optimization algorithm doesn’t scale with the size of the datasets (but depends on the number of images used for building the dictionary), it can be a worthwhile component to be integrated into the pipeline.</p>
+<h2 id="using-all-training-images-to-build-the-dictionary">Using All Training Images to Build the Dictionary</h2>
+<p>So far we only used 50 images for building the dictionary, out of 1500 images in the training set. What if we use the whole training set to build the dictionary? Will the dictionary be more representative and yield higher accuracy? Therefore, we ran an experiment to verify this.</p>
+<p>Of course, the process of building the dictionary was 30 times slower. Because this modification only affects dictionary building, the execution time for extracting features and training classifiers kept unchanged.</p>
+<p>The classification accuracy is 79.20%. The average accuracy of all classes is 78.71%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/LLC_all.jpg" />
+
+</div>
+<p>This shows that using a larger set of images for building the dictionary does improve the performance to some extent.</p>
+<h2 id="parameter-selection-for-llc">Parameter Selection for LLC</h2>
+<p>We were also interested how the parameters affect the performance of this algorithm. We wrote a script to automatically run experiments with vocabulary size (M) equal to 512, 1024 and 2048 as well as number of nearest neighbors (K) equal to 1, 2, 5, 10 and 25.</p>
+<p>For each combination of parameters, we did a ten-fold cross-validation on the training set. Then we selected the parameters with the highest accuracy, and tested the classification performance on the testing set.</p>
+<p>The cross-validation results are given as follows.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">M \ K</th>
+<th align="center">1</th>
+<th align="center">2</th>
+<th align="center">5</th>
+<th align="center">10</th>
+<th align="center">25</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">512</td>
+<td align="center">81.00</td>
+<td align="center">83.80</td>
+<td align="center">81.87</td>
+<td align="center">79.80</td>
+<td align="center">77.93</td>
+</tr>
+<tr class="even">
+<td align="center">1024</td>
+<td align="center">82.60</td>
+<td align="center">84.67</td>
+<td align="center">85.33</td>
+<td align="center">84.33</td>
+<td align="center">81.87</td>
+</tr>
+<tr class="odd">
+<td align="center">2048</td>
+<td align="center">81.60</td>
+<td align="center">85.00</td>
+<td align="center">85.87</td>
+<td align="center">85.80</td>
+<td align="center">83.80</td>
+</tr>
+</tbody>
+</table>
+<p>Therefore, the best combination of parameters should be M = 2048 and K = 5, which was consistent with the results from the LLC paper.</p>
+<p>As we used a dictionary with a larger vocabulary size, feature extraction became a bit slower. It took ~0.9s to process each image.</p>
+<p>The feature vectors also became longer, so it took more time to train SVMs. The training and predicting process took ~4.5s to run. The classification accuracy is 79.23%. The average accuracy of all classes is 78.37%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/LLC_final.jpg" />
+
+</div>
+<p>This shows that using a larger vocabulary size doesn’t contribute much to the performance improvement. So we continued using the vocabulary size of 1024 in the following experiments.</p>
+<h2 id="object-bank">Object Bank</h2>
+<p>Object bank is another state-of-the-art approach to scene classification. We ran an experiment with the object bank code provided by the authors. We used the partless code which can speed up the feature extraction while maintaining even higher classification result.</p>
+<p>The provided object bank code is not fully optimized. It took ~3.5s to process each image.</p>
+<p>As the extracted feature vectors are not sparse, it usually takes unreasonably long time to train the L2-regularized L2-loss SVC (dual). So we used the L1-regularized logistic regression instead.</p>
+<p>The training and predicting process took ~75s to run. The classification accuracy is 79.70%. The average accuracy of all classes is 78.91%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/OB.jpg" />
+
+</div>
+<h2 id="combining-llc-and-object-bank">Combining LLC and Object Bank</h2>
+<p>We tried to combine these two state-of-the-art approaches to achieve even higher accuracy.</p>
+<h3 id="concatenating-feature-vectors">Concatenating Feature Vectors</h3>
+<p>In our first version, we simply concatenated the two feature vectors from LLC and object bank.</p>
+<p>Because the object bank component of the feature vectors was not sparse, we used the L1-regularized logistic regression to speed up training.</p>
+<p>The training and predicting process took ~85s to run. The classification accuracy is 79.97%. The average accuracy of all classes is 79.15%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/hybrid_concatenate.jpg" />
+
+</div>
+<p>This shows that concatenating LLC and object bank feature vectors really yields promising results, which outperforms LLC or object bank used separately. However, notice that integrating object bank increases the classification accuracy from 79.20% to 79.97%, but also increases the training and predicting time from ~3s to ~85s. It’s a serious question whether this tradeoff is worthwhile or not.</p>
+<h3 id="summing-up-decision-values">Summing Up Decision Values</h3>
+<p>In our second version, we trained two classifiers independently for LLC and object bank, and then summed up decision values to determine the classification of the test images.</p>
+<p>The training and predicting process took ~80s to run. The classification accuracy is 81.34%. The average accuracy of all classes is 80.65%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/hybrid_decval.jpg" />
+
+</div>
+<p>This shows that summing up decision values from LLC and object bank gives us results that are beyond the state-of-the-art. Although the training and predicting time is still quite long, it achieves really high accuracy in return, which makes us believe that the tradeoff is worthwhile to make.</p>
+<h2 id="adaboosting">Adaboosting</h2>
+<p>Finally, we tried to use some ensemble learning methods. We chose to implement the famous Adaboost algorithm.</p>
+<p>We used the LLC feature vectors only for this experiment. We arbitrarily selected the number of weak learners to be 10, and the C parameter to be 800.</p>
+<p>The training and predicting process took ~25s to run. The classification accuracy is 79.50%. The average accuracy of all classes is 78.55%. The confusion matrix is as follows.</p>
+<div class="figure">
+<img src="images/adaboost.jpg" />
+
+</div>
+<p>This shows that adaboosting doesn’t increase the accuracy a lot. We found that this was because the learners were actually strong enough, that is, they almost did a perfect job on classifying the training images (e.g. if we increased the C parameter from 800 to 1000, the “weak” learners would always yield 100% training set accuracy). Given the fixed training set, the learners could not really learn more useful information from it.</p>
+<h1 id="using-the-gui">Using the GUI</h1>
+<p>To make working with our LLC pipeline easier, we’ve implemented a simple GUI that streamlines the process and visually displays the results. Users can select whether to use SPM or LLC, what codebook size to use, how many nearest neighbors to select, and whether to use k-means++, codebook optimization, and/or object bank.</p>
+<p>The GUI basic pipeline is:</p>
+<ol style="list-style-type: decimal">
+<li>Run the program (llc_gui.m)</li>
+<li>Select options (defaults are top performing parameters)</li>
+<li>Click ‘Run’</li>
+</ol>
+<h2 id="important-notes-1">Important Notes</h2>
+<p>For simplicity, some parameters are static for the GUI. These parameters are reflective of the best results discussed in our result section. We also require a certain directory structure.</p>
+<h3 id="static-parameters">Static parameters</h3>
+<ol style="list-style-type: decimal">
+<li>We use 100 training images per a class</li>
+<li>We use a grid with spacing of 8 pixels</li>
+<li>We use 16 x 16 pixel patches</li>
+<li>We use 3 pyramid levels</li>
+<li>We set lambda to 50 and sigma to 10</li>
+<li>The Use Object Bank option uses the summing method of combining LLC and Object Bank</li>
+</ol>
+<h3 id="directory-structure">Directory Structure</h3>
+<p>As mentioned in the intro, this project uses many libraries and saves dictionaries/pyramids/object bank data as intermediate files. It is critical that the following directory structure is maintained or the code will not function properly. The most important relationship to preserve is that between the MATLAB scripts and the libraries &amp; dataset.</p>
+<div class="figure">
+<img src="images/DIR_structure.jpg" />
+
+</div>
+<h2 id="starting-the-gui">Starting the GUI</h2>
+<p>Simply run the file <em>llc_gui.m</em></p>
+<h2 id="selecting-options">Selecting Options</h2>
+<h3 id="method-options">Method Options</h3>
+<ul>
+<li>SPM -&gt; Use basic spatial pyramid (VQ coding)</li>
+<li>LLC -&gt; Use locality-constrained linear coding spatial pyramid (LLC coding)</li>
+</ul>
+<h3 id="codebook-options">Codebook Options</h3>
+<ul>
+<li>Use K-means++ -&gt; Check to use K-means++ to seed the K-means algorithm (instead of random initial centers)</li>
+<li>Optimize Codebook -&gt; Check to use the codebook optimization algorithm (algorithm 4.1 in the paper)</li>
+<li>Codebook Size -&gt; Use the dropdown to select the number of codebook features</li>
+</ul>
+<h3 id="other-options">Other Options</h3>
+<ul>
+<li>k-NN -&gt; Use the dropdown to select the number of nearest neighbors to consider (locality)</li>
+<li>Use Object Bank -&gt; Check to use the combined LLC and Object Bank scene classification</li>
+</ul>
+<h2 id="interpreting-the-results">Interpreting the Results</h2>
+<h3 id="accuracies-panel">Accuracies Panel</h3>
+<p>This panel contains the accuracy results for each class, the average of these class (CLASSES AVG) results, and the total accuracy (WHOLE TEST) of all test examples considered together.</p>
+<h3 id="confusion-matrix-panel">Confusion Matrix Panel</h3>
+<p>This panel contains a table of the raw confusion matrix <strong>(the class number corresponds to the class number in the ‘Accuracies Panel’)</strong>. A graphical view is also displayed in a separate figure window.</p>
+<h1 id="file-descriptions">File Descriptions</h1>
+<p>For this project we use many existing libraries which have been modified to use LLC coding. Below we describe home-made functions and important library modifications.</p>
+<h2 id="main-files">Main Files</h2>
+<h3 id="llc_gui.m">llc_gui.m</h3>
+<p><code>function varargout = llc_gui(varargin)</code></p>
+<p>This function launches the main GUI window. It is not meant to be called programatically! <strong>Please run this as the main script in MATLAB.</strong></p>
+<h3 id="libspatialpyramid-llckmeans_plusplus.m">lib\spatialpyramid-llc\kmeans_plusplus.m</h3>
+<p><code>function [initial_centers] = kmeans_plusplus(data, k)</code></p>
+<p>Inputs:</p>
+<ul>
+<li>data - N x D matrix of SIFT features for training images</li>
+<li>k - the codebook size (number of centers)</li>
+</ul>
+<p>Outputs:</p>
+<ul>
+<li>initial_centers - k x D matrix of initial centers to seed K-means algorithm</li>
+</ul>
+<h3 id="libspatialpyramid-llccodebook_opt.m">lib\spatialpyramid-llc\codebook_opt.m</h3>
+<p><code>function [B] = codebook_opt(Binit, X, lambda, sigma)</code></p>
+<p>Inputs:</p>
+<ul>
+<li>Binit - M x D initial codebook from k-means</li>
+<li>X - N x D matrix of SIFT features for training images</li>
+<li>lambda - regularization parameter for LLC optimization function</li>
+<li>sigma - distance coefficient parameter</li>
+</ul>
+<p>Outputs:</p>
+<ul>
+<li>B - M x D optimized codebook</li>
+</ul>
+<h3 id="libspatialpyramid-llccalculatedictionary.m">lib\spatialpyramid-llc\CalculateDictionary.m</h3>
+<p>Changes:</p>
+<ul>
+<li>Added function calls to use K-means++ and/or codebook optimization (if selected)</li>
+<li>Added new parameters for llc, k-means++, and codebook optimization:
+<ul>
+<li>params.sigma - Gaussian coefficient for codebook optimization (a good value is 10)</li>
+<li>params.lambda - Regularization coefficient for codebook optimization (a good value is 50)</li>
+<li>params.k - The number of nearest neighbors, locality (a good value is 5);</li>
+<li>params.useCodebookOptim - {1,0} 1 is true, 0 is false</li>
+<li>params.useKMeansPP - {1,0} 1 is true, 0 is false;</li>
+</ul></li>
+</ul>
+<h3 id="libspatialpyramid-llcbuildhistograms.m">lib\spatialpyramid-llc\BuildHistograms.m</h3>
+<p>Changes:</p>
+<ul>
+<li>Changed coding method to use approximate LLC encoding (marked in comments)</li>
+<li>Added new parameters for llc, k-means++, and codebook optimization:
+<ul>
+<li>params.sigma - Gaussian coefficient for codebook optimization (a good value is 10)</li>
+<li>params.lambda - Regularization coefficient for codebook optimization (a good value is 50)</li>
+<li>params.k - The number of nearest neighbors, locality (a good value is 5);</li>
+<li>params.useCodebookOptim - {1,0} 1 is true, 0 is false</li>
+<li>params.useKMeansPP - {1,0} 1 is true, 0 is false;</li>
+</ul></li>
+</ul>
+<h3 id="libspatialpyramid-llccompilepyramid.m">lib\spatialpyramid-llc\CompilePyramid.m</h3>
+<p>Changes:</p>
+<ul>
+<li>Changed the pooling to select the max(pyramid patch) value instead of summing (marked in comments)</li>
+<li>Added new parameters for llc, k-means++, and codebook optimization:
+<ul>
+<li>params.sigma - Gaussian coefficient for codebook optimization (a good value is 10)</li>
+<li>params.lambda - Regularization coefficient for codebook optimization (a good value is 50)</li>
+<li>params.k - The number of nearest neighbors, locality (a good value is 5);</li>
+<li>params.useCodebookOptim - {1,0} 1 is true, 0 is false</li>
+<li>params.useKMeansPP - {1,0} 1 is true, 0 is false;</li>
+</ul></li>
+</ul>
+<h3 id="libspatialpyramid-llcbuildpyramid.m">lib\spatialpyramid-llc\BuildPyramid.m</h3>
+<p>Changes:</p>
+<ul>
+<li>Added new parameters for llc, k-means++, and codebook optimization:
+<ul>
+<li>params.sigma - Gaussian coefficient for codebook optimization (a good value is 10)</li>
+<li>params.lambda - Regularization coefficient for codebook optimization (a good value is 50)</li>
+<li>params.k - The number of nearest neighbors, locality (a good value is 5);</li>
+<li>params.useCodebookOptim - {1,0} 1 is true, 0 is false</li>
+<li>params.useKMeansPP - {1,0} 1 is true, 0 is false;</li>
+</ul></li>
+</ul>
+<h3 id="libobjectbankpartlessgetfeat_single_image.m">lib\objectBank\partless\getfeat_single_image.m</h3>
+<p>Changes:</p>
+<ul>
+<li>Changed the feature file format to “*.mat“.</li>
+<li>Changed the function signature to return the feature vector.</li>
+<li>Added the code for checking and loading existing feature files.</li>
+</ul>
+<h2 id="individual-test-scripts">Individual / Test Scripts</h2>
+<p>These files are scripts for running various functionality through the pipeline (baseline SPM, LLC, object bank, etc.). Most of their functionality is included in the GUI. These should run if the directory structure is preserved.</p>
+<h3 id="baseline.m">baseline.m</h3>
+<p>A script to perform 1 test run of the original spatial pyramid code both with and without histograms. Parameters are set with the ‘params’ structure.</p>
+<h3 id="llc.m">llc.m</h3>
+<p>A script to perform 1 test run of the modified LLC spatial pyramid code. Parameters are set with the ‘params’ structure.</p>
+<h3 id="objectbank.m">objectbank.m</h3>
+<p>A script to perform 1 test run of the object bank code (this is stand alone object bank).</p>
+<h3 id="hybrid.m">hybrid.m</h3>
+<p>A script to perform 1 test run of the combined LLC spatial pyramid &amp; object bank code. 2 versions are tested: 1) using concatenated feature vectors 2) using summed predictors. LLC parameters are set with the ‘params’ structure.</p>
+<h3 id="adaboost.m">adaboost.m</h3>
+<p>A script to perform 1 test run using an ensemble (adaboost). LLC parameters are set with the ‘params’ structure.</p>
+<h3 id="llc_test.m">llc_test.m</h3>
+<p>This script tests 10-fold cross validation for parameter values codebook size and k. Values tested are: k_vals = [1 2 5 10 25] &amp; codebook_vals = [512 1024 2048]. Parameters are set with the ‘params’ structure.</p>
+<h3 id="llc_tune.m">llc_tune.m</h3>
+<p><code>function [tune_accuracy] = llc_tune(filenames_train, labels_train, image_dir, data_dir, params)</code></p>
+<p>Inputs:</p>
+<ul>
+<li>filenames_train - a cell array containing the filenames of the training images</li>
+<li>labels_train - the correct labels for the training images</li>
+<li>image_dir - the base directory containing the images</li>
+<li>data_dir - the base directory to store coding data for the training images</li>
+<li>params - the structure containing the spatial pyramid code parameters</li>
+</ul>
+<p>Outputs:</p>
+<ul>
+<li>tune_accuracy - the 10-fold cross validation accuracy for this parameter set</li>
+</ul>
+<p>Description:</p>
+<ul>
+<li>This function is used to perform 10-fold cross validation for a given set of parameters. This was used to select optimal k &amp; codebook size.</li>
+</ul>
+<h2 id="other-files">Other Files</h2>
+<p>Some other files that are not meant to be used functionally, but are either needed for the GUI or were used for testing.</p>
+<h3 id="llc_gui.fig"><em>llc_gui.fig</em></h3>
+<p>The MATLAB figure for the main program GUI.</p>
+<h1 id="credits">Credits</h1>
+<p>Below is a break-down of the work description.</p>
+<h2 id="ke-ma">Ke Ma</h2>
+<ul>
+<li>Scene classification pipeline</li>
+<li>Basic LLC bug fix</li>
+<li>Codebook optimization algorithm bug fix</li>
+<li>LLC and object bank combination</li>
+<li>Adaboost algorithm implementation</li>
+</ul>
+<h2 id="christopher-bodden">Christopher Bodden</h2>
+<ul>
+<li>Basic LLC implementation</li>
+<li>K-means++ algorithm implementation</li>
+<li>Codebook optimization algorithm implementation</li>
+<li>Parameter selection for LLC</li>
+<li>GUI</li>
+</ul>
+<h1 id="references">References</h1>
+<ol style="list-style-type: decimal">
+<li>Lazebnik, S., Schmid, C., &amp; Ponce, J. (2006). Beyond bags of features: Spatial pyramid matching for recognizing natural scene categories.</li>
+<li>Wang, J., Yang, J., Yu, K., Lv, F., Huang, T., &amp; Gong, Y. (2010). Locality-constrained linear coding for image classification.</li>
+<li>Li, L. J., Su, H., Fei-Fei, L., &amp; Xing, E. P. (2010). Object bank: A high-level image representation for scene classification &amp; semantic feature sparsification.</li>
+<li>Arthur, D., &amp; Vassilvitskii, S. (2007). k-means++: The advantages of careful seeding.</li>
+<li>Freund, Y., &amp; Schapire, R. E. (1997). A decision-theoretic generalization of on-line learning and an application to boosting.</li>
+<li>Chang, C. C., &amp; Lin, C. J. (2011). LIBSVM: a library for support vector machines.</li>
+<li>Fan, R. E., Chang, K. W., Hsieh, C. J., Wang, X. R., &amp; Lin, C. J. (2008). LIBLINEAR: A library for large linear classification.</li>
+<li>Fifteen Scene Categories. http://www.cs.unc.edu/~lazebnik/research/scene_categories.zip</li>
+</ol>
+<hr />
+<p>&copy;2015 Ke Ma, Christopher Bodden</p>
+</body>
+</html>

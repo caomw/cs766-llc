@@ -1,0 +1,3 @@
+generated with pandoc:
+
+pandoc -s -S --toc -c style.css -T "CS 766 - LLC Project Documentation" -A footer.html readme.md -o documentation.html
