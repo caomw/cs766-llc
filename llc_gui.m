@@ -116,7 +116,7 @@ params.lambda = 50;
 params.useCodebookOptim = 1;
 params.useKMeansPP = 1;
 params.k = k_vals(3);
-params.useObjectBank = 0;
+params.useObjectBank = 1;
 params.dictionarySize = codebook_vals(4);
 
 % save params
@@ -158,8 +158,8 @@ disp('Supressing warnings');
 warning('off', 'all');
 
 % clear axes
-cla(handles.confuse_plot);
-set(handles.confuse_plot, 'Visible', 'off');
+% cla(handles.confuse_plot);
+set(handles.confuse_table, 'Visible', 'off');
 
 % reset accuracies
 accuracy_vals = getappdata(handles.figure1,'accuracy_vals');
@@ -191,6 +191,10 @@ filenames_test = getappdata(handles.figure1,'filenames_test');
 labels_train = getappdata(handles.figure1,'labels_train');
 labels_test = getappdata(handles.figure1,'labels_test');
 
+num_categories = length(categories);
+num_images_train = length(labels_train);
+num_images_test = length(labels_test);
+
 % extract coding method
 switch get(get(handles.method_group,'SelectedObject'),'Tag')
     case 'radio_llc',  useLLC = 1;
@@ -216,22 +220,75 @@ else
 end
 
 % train SVM and predict
+
 addpath('lib/liblinear-1.96/matlab');
-model_linear = train(labels_train, sparse(pyramid_train), '-c 10');
-[labels_test_linear, accuracy_linear, ~] = predict(labels_test, sparse(pyramid_test), model_linear);
+model_llc = train(labels_train, sparse(pyramid_train), '-c 10');
+[labels_test_predict, accuracy, decval_llc] = predict(labels_test, sparse(pyramid_test), model_llc);
 rmpath('lib/liblinear-1.96/matlab');
+
+% compute object bank if needed
+if (params.useObjectBank ~= 0)
+    disp('USING OBJECT BANK! GENERATING FEATURES!');
+    ob_dir = '../features/scene-category-objectbank';
+    
+    % extract features - Object Bank
+    addpath('lib/objectBank/partless');
+    feature_dim = 44604;
+    ob_train = zeros(num_images_train, feature_dim);
+    ob_test = zeros(num_images_test, feature_dim);
+    fprintf('Extracting features for training set images (%d)\n', num_images_train);
+    for i = 1 : num_images_train
+        if ~mod(i, 5),
+           fprintf('.');
+        end
+        if ~mod(i, 100),
+            fprintf(' %d images processed\n', i);
+        end
+        img_path = fullfile(image_dir, filenames_train{i});
+        [subfolder, filename] = fileparts(filenames_train{i});
+        feature_path = fullfile(ob_dir, subfolder);
+        ob_train(i, :) = getfeat_single_image(img_path, filename, feature_path);
+    end
+    fprintf('Extracting features for testing set images (%d)\n', num_images_test);
+    for i = 1 : num_images_test
+        if ~mod(i, 5),
+           fprintf('.');
+        end
+        if ~mod(i, 100),
+            fprintf(' %d images processed\n', i);
+        end
+        img_path = fullfile(image_dir, filenames_test{i});
+        [subfolder, filename] = fileparts(filenames_test{i});
+        feature_path = fullfile(ob_dir, subfolder);
+        ob_test(i, :) = getfeat_single_image(img_path, filename, feature_path);
+    end
+    clear img_path subfolder filename feature_path;
+    rmpath('lib/objectBank/partless');
+    
+    %train and predict object bank
+    addpath('lib/liblinear-1.96/matlab');
+    model_ob = train(labels_train, sparse(ob_train), '-s 6 -c 10');
+    [~, ~, decval_ob] = predict(labels_test, sparse(ob_test), model_ob);
+    rmpath('lib/liblinear-1.96/matlab');
+    
+    %combine
+    decval_all = decval_llc + decval_ob;
+    [~, labels_test_predict] = max(decval_all, [], 2);
+    accuracy = sum(labels_test_predict==labels_test) / num_images_test * 100;
+end
+
 
 % setup accuracies
 class_acc = nan(1,15);
 for ind = 1:15
     class_ind = labels_test == ind;
-    class_acc(ind) = sum( labels_test(class_ind) == labels_test_linear(class_ind) ) / sum( class_ind );
+    class_acc(ind) = sum( labels_test(class_ind) == labels_test_predict(class_ind) ) / sum( class_ind );
     class_acc(ind) = class_acc(ind) * 100;
     accuracy_vals{ind} = [accuracy_vals{ind} num2str(class_acc(ind),3)];
 end
 avg_acc = sum(class_acc) / 15;
 accuracy_vals{16} = [accuracy_vals{16} num2str(avg_acc,3)];
-accuracy_vals{17} = [accuracy_vals{17} num2str(accuracy_linear(1),3)];
+accuracy_vals{17} = [accuracy_vals{17} num2str(accuracy(1),3)];
 set(handles.text1, 'String', accuracy_vals(1));
 set(handles.text2, 'String', accuracy_vals(2));
 set(handles.text3, 'String', accuracy_vals(3));
@@ -251,19 +308,21 @@ set(handles.text16, 'String', accuracy_vals(16));
 set(handles.text17, 'String', accuracy_vals(17));
 
 % generate confusion matrix
-num_images_test = length(labels_test);
-num_categories = length(categories);
+[C,order] = confusionmat(labels_test,labels_test_predict);
+C = C ./ repmat(sum(C, 2), 1, num_categories);
+set(handles.confuse_table, 'Visible', 'on', 'Data', C);
+
 targets = false(num_categories, num_images_test);
 outputs = targets;
 for i = 1 : num_images_test
     targets(labels_test(i), i) = true;
-    outputs(labels_test_linear(i), i) = true;
+    outputs(labels_test_predict(i), i) = true;
 end
-%axes(handles.confuse_plot);
-%plotconfusion(targets, outputs);
-%pos = get(h,'Position');
-%pos([3,4]) = pos([3,4]) .* 3;
-%set(h,'Position', pos, 'PaperPositionMode','auto');
+h = figure;
+plotconfusion(targets, outputs);
+pos = get(h,'Position');
+pos([3,4]) = pos([3,4]) .* 1.5;
+set(h,'Position', pos, 'PaperPositionMode','auto');
 
 % --- Executes on button press in checkbox_kmeanspp.
 function checkbox_kmeanspp_Callback(hObject, eventdata, handles)
