@@ -117,7 +117,7 @@ params.useCodebookOptim = 1;
 params.useKMeansPP = 1;
 params.k = k_vals(3);
 params.useObjectBank = 1;
-params.dictionarySize = codebook_vals(4);
+params.dictionarySize = codebook_vals(3);
 
 % save params
 setappdata(handles.figure1,'accuracy_vals', accuracy_vals);
