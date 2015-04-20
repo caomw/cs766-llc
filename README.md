@@ -23,6 +23,7 @@ This is a brief description of our implementation. More details can be found in 
 * Combined LLC with Object Bank to improve accuracy
 * Implemented codebook optimization (algorithm 4.1 in the paper)
 * Implemented K-means++ to select K-means initial centers more intelligently
+* Implemented Adaboost to improve performance
 * Built a GUI to easily run our pipeline
 
 ## Program Screenshot:
