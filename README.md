@@ -62,7 +62,7 @@ We have included our codebooks of sizes 512, 1024, and 2048 in order to speed up
 
 * "\features\scene-category-llc"
 
-**Any other sizes will have to be created which will take significant time.
+**Any other sizes will have to be created which will take significant time.**
 
 ### Features
 
